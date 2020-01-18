@@ -1,0 +1,20 @@
+//The main program
+
+import java.awt.Color;
+import javax.swing.*;
+
+public class SnakeGame {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Snake Game");
+        Gameplay gameplay = new Gameplay();
+        
+        frame.setBounds(1, 1, 1000, 900);
+        frame.setBackground(Color.DARK_GRAY);
+        frame.setResizable(false);
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(gameplay);
+        
+    }
+    
+}
