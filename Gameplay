@@ -1,0 +1,279 @@
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.Random;
+import javax.swing.*;
+
+/**
+ *
+ * @author erfan
+ */
+public class Gameplay extends JPanel implements KeyListener, ActionListener {
+
+    private int[] snakeX = new int[750];
+    private int[] snakeY = new int[750];
+
+    private boolean gameOver = false;
+    private boolean left = false;
+    private boolean right = false;
+    private boolean up = false;
+    private boolean down = false;
+
+    private ImageIcon snake;
+    private ImageIcon food;
+
+    //image is 25 pixels wide and long
+    private int[] foodX = {25, 50, 75, 100, 125, 150, 175, 200, 225, 250,
+        275, 300, 325, 350, 375, 400, 425, 450, 475, 500, 525, 550, 575,
+        600, 625, 650, 675, 700, 725, 750, 775, 800, 825, 850, 875, 900,
+        925, 950};
+
+    private int[] foodY = {25, 50, 75, 100, 125, 150, 175, 200, 225, 250,
+        275, 300, 325, 350, 375, 400, 425, 450, 475, 500, 525, 550, 575,
+        600, 625, 650, 675, 700, 725, 750, 775, 800, 825};
+
+    private Random random = new Random();
+
+    private int xFood = random.nextInt(38);
+    private int yFood = random.nextInt(33);
+
+    private int length = 3;
+
+    private Timer timer;
+    private int delay = 100;
+
+    private int moves = 0;
+
+    public Gameplay() {
+        addKeyListener(this);
+        setFocusable(true);
+        setFocusTraversalKeysEnabled(false);
+        timer = new Timer(delay, this);
+        timer.start();
+    }
+
+    public void paint(Graphics g) {
+
+        if (moves == 0) {
+            snakeX[2] = 450;
+            snakeX[1] = 475;
+            snakeX[0] = 500;
+
+            snakeY[2] = 400;
+            snakeY[1] = 400;
+            snakeY[0] = 400;
+
+        }
+
+        //background for gameplay
+        g.setColor(Color.BLACK);
+        g.fillRect(25, 25, 950, 825);
+
+        //draw length
+        g.setColor(Color.white);
+        g.setFont(new Font("arial", Font.PLAIN, 14));
+        g.drawString("Length: " + length, 25, 40);
+
+        //draw snake
+        snake = new ImageIcon("snake.png");
+        snake.paintIcon(this, g, snakeX[0], snakeY[0]);
+
+        for (int i = 0; i < length; i++) {
+            snake = new ImageIcon("snake.png");
+            snake.paintIcon(this, g, snakeX[i], snakeY[i]);
+        }
+
+        food = new ImageIcon("food.png");
+
+        if (foodX[xFood] == snakeX[0] && foodY[yFood] == snakeY[0]) { //if head is at food
+            length++;
+            xFood = random.nextInt(38);
+            yFood = random.nextInt(33);
+            spawnFood(g);
+        }
+        spawnFood(g);
+
+        //game over screen
+        if (gameOver){
+            right = false;
+            up = false;
+            down = false;
+            left = false;
+            
+            g.setColor(Color.white);
+            g.setFont(new Font("arial", Font.BOLD, 50));
+            g.drawString("Game Over", 375, 400);
+
+            g.setFont(new Font("arial", Font.BOLD, 20));
+            g.drawString("Space to RESTART", 400, 450);
+            spawnFood(g);
+        }
+        
+        checkGameOver();
+        g.dispose();
+    }
+
+    public void spawnFood(Graphics g) {
+        if (moves == 0) {
+            food.paintIcon(this, g, foodX[xFood], foodY[yFood]);
+        } else {
+            for (int i = 1; i < length; i++) {
+                if ((foodX[xFood] == snakeX[i]) && (foodY[yFood] == snakeY[i])) {
+                    xFood = random.nextInt(38);
+                    yFood = random.nextInt(33);
+                    spawnFood(g);
+                }
+            }
+            food.paintIcon(this, g, foodX[xFood], foodY[yFood]);
+        }
+
+    }
+
+    
+    public void checkGameOver(){
+        for (int i = 1; i < length; i++) {
+            if (snakeX[i] == snakeX[0] && snakeY[i] == snakeY[0]) {
+                gameOver = true;
+            }
+        }
+    }
+    
+    @Override
+    public void keyTyped(KeyEvent ke) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent ke) {
+
+        if (ke.getKeyCode() == KeyEvent.VK_SPACE && gameOver) {
+            moves = 0;
+            length = 3;
+            repaint();
+            gameOver = false;
+            right = false;
+            up = false;
+            down = false;
+            left = false;
+        }
+        if (!gameOver) {
+            if (ke.getKeyCode() == KeyEvent.VK_RIGHT || ke.getKeyCode() == KeyEvent.VK_D) {
+                if (!left) {
+                    moves++;
+                    right = true;
+                    up = false;
+                    down = false;
+                    left = false;
+                }
+
+            } else if (ke.getKeyCode() == KeyEvent.VK_LEFT || ke.getKeyCode() == KeyEvent.VK_A) {
+                if (!right) {
+                    moves++;
+                    left = true;
+                    up = false;
+                    down = false;
+                    right = false;
+                }
+            } else if (ke.getKeyCode() == KeyEvent.VK_UP || ke.getKeyCode() == KeyEvent.VK_W) {
+                if (!down) {
+                    moves++;
+                    up = true;
+                    left = false;
+                    down = false;
+                    right = false;
+                }
+            } else if (ke.getKeyCode() == KeyEvent.VK_DOWN || ke.getKeyCode() == KeyEvent.VK_S) {
+                if (!up) {
+                    moves++;
+                    down = true;
+                    up = false;
+                    left = false;
+                    right = false;
+                }
+            }
+        }
+        
+
+    }
+
+    @Override
+    public void keyReleased(KeyEvent ke) {}
+
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        timer.start();
+
+        if (right) {
+            //y stays the same when going right
+            for (int r = length - 1; r >= 0; r--) {
+                snakeY[r + 1] = snakeY[r];
+            }
+
+            for (int r = length - 1; r >= 0; r--) {
+                if (r == 0) {
+                    snakeX[r] = snakeX[r] + 25; //head
+                } else {
+                    snakeX[r] = snakeX[r - 1]; //body follows
+                }
+                if (snakeX[r] > 950) { //if its going at the edge
+                    snakeX[r] = 25; //send it through to the left edge
+                }
+            }
+            repaint();
+        } else if (left) {
+
+            for (int r = length - 1; r >= 0; r--) {
+                snakeY[r + 1] = snakeY[r];
+            }
+            for (int r = length - 1; r >= 0; r--) {
+                if (r == 0) {
+                    snakeX[r] = snakeX[r] - 25;
+                } else {
+                    snakeX[r] = snakeX[r - 1];
+                }
+                if (snakeX[r] < 25) {
+                    snakeX[r] = 950;
+                }
+            }
+            repaint();
+
+        } else if (down) {
+
+            for (int r = length - 1; r >= 0; r--) {
+                snakeX[r + 1] = snakeX[r];
+            }
+            for (int r = length - 1; r >= 0; r--) {
+                if (r == 0) {
+                    snakeY[r] = snakeY[r] + 25;
+                } else {
+                    snakeY[r] = snakeY[r - 1];
+                }
+                if (snakeY[r] > 825) {
+                    snakeY[r] = 25;
+                }
+            }
+            repaint();
+
+        } else if (up) {
+
+            for (int r = length - 1; r >= 0; r--) {
+                snakeX[r + 1] = snakeX[r];
+            }
+            for (int r = length - 1; r >= 0; r--) {
+                if (r == 0) {
+                    snakeY[r] = snakeY[r] - 25;
+                } else {
+                    snakeY[r] = snakeY[r - 1];
+                }
+                if (snakeY[r] < 25) {
+                    snakeY[r] = 825;
+                }
+            }
+            repaint();
+        }
+    }
+
+}
